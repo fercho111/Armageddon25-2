@@ -101,10 +101,11 @@ if __name__ == "__main__":
     E_over_V0 = np.linspace(0.1, 10.0, 50)
     ells = [0]  # only s-wave in this comparison
 
-    fig, axes = plt.subplots(3, 3, figsize=(15, 10))
+    # Now: rows = param sets, cols = graph types
+    fig, axes = plt.subplots(len(param_sets), 3, figsize=(15, 10))
     plt.subplots_adjust(hspace=0.4, wspace=0.3)
 
-    for col, (title, V0, a, b, p, lam) in enumerate(param_sets):
+    for row, (title, V0, a, b, p, lam) in enumerate(param_sets):
         # Compute phase shifts, sin^2, and cross sections
         deltas, sin2_vals, sigma_vals = [], [], []
         for ratio in E_over_V0:
@@ -115,32 +116,35 @@ if __name__ == "__main__":
             sin2_vals.append(np.sin(delta)**2)
             sigma_vals.append(total_cross_section([delta], k))
 
-
+        # Beautify deltas
         deltas = better_deltas(deltas, flip=True)
 
-        # --- Row 1: Phase shifts
-        ax1 = axes[0, col]
-        ax1.plot(E_over_V0, deltas, color="blue", marker=".")
-        ax1.set_title(f"{title}\nDesplazamiento de fase s-wave")
+        # --- Col 0: Phase shifts
+        ax1 = axes[row, 0]
+        ax1.plot(E_over_V0, deltas, color="c", marker=".")
+        if row == 0:
+            ax1.set_title("Desplazamiento de fase s-wave")
         ax1.set_xlabel(r"$E/V_0$")
-        ax1.set_ylabel(r"$\delta_0$ (rad)")
+        ax1.set_ylabel(fr"{title}\n$\delta_0$ (rad)")
         ax1.grid(True)
 
-        # --- Row 2: Resonance plot sin^2
-        ax2 = axes[1, col]
-        ax2.plot(E_over_V0, sin2_vals, color="red", marker=".")
-        ax2.set_title("Resonancias s-wave")
+        # --- Col 1: Total cross section
+        ax2 = axes[row, 1]
+        ax2.plot(E_over_V0, sigma_vals, color="y", marker=".")
+        if row == 0:
+            ax2.set_title("Sección eficaz total")
         ax2.set_xlabel(r"$E/V_0$")
-        ax2.set_ylabel(r"$\sin^2(\delta_0)$")
-        ax2.set_ylim(-0.1, 1.1)  # full resonance range
+        ax2.set_ylabel(r"$\sigma_{\text{tot}}$")
         ax2.grid(True)
 
-        # --- Row 3: Total cross section
-        ax3 = axes[2, col]
-        ax3.plot(E_over_V0, sigma_vals, color="green", marker=".")
-        ax3.set_title("Sección eficaz total")
+        # --- Col 2: Resonance sin^2
+        ax3 = axes[row, 2]
+        ax3.plot(E_over_V0, sin2_vals, color="m", marker=".")
+        if row == 0:
+            ax3.set_title("Resonancias s-wave")
         ax3.set_xlabel(r"$E/V_0$")
-        ax3.set_ylabel(r"$\sigma_{\text{tot}}$")
+        ax3.set_ylabel(r"$\sin^2(\delta_0)$")
+        ax3.set_ylim(-0.1, 1.1)  # full resonance range
         ax3.grid(True)
 
     plt.tight_layout()
